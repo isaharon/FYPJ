@@ -26,5 +26,8 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Numpy files
-.npy
+# Project files and directory
+*.npy
+/fuzzerdata001
+/fuzzerdata002
+/Old
