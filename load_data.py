@@ -30,7 +30,14 @@ def main():
     print(np_data[0][:32])
     print(np_data[3][:32])
     print(np_data[5][:32])
-    print(np_data.shape)
+    samples, max_filesize, num_of_features = np_data.shape
+    new_data = np_data.reshape((samples, 512, 64))
+    print(new_data[0][:2])
+    print(new_data[3][:2])
+    print(new_data[5][:2])
+    print(new_data.shape)
+    if (new_data[0] == new_data[3]).all():
+        print("Match")
 
 if __name__ == '__main__':
     main()

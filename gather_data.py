@@ -2,20 +2,24 @@
 
 import os
 import argparse
-import re
 import numpy as np
+
+max_filesize = 4096
+chunksize = 8
 
 def saveToFile(sample_x, sample_y, output_file):
 
     np.save(output_file + "_x", sample_x)
+    print("[+] Output X dataset to: " + output_file + "_x.npy")
     np.save(output_file + "_y", sample_y)
+    print("[+] Output Y dataset to: " + output_file + "_y.npy")
 
     return 0
 
 # Given numpy array of x and y, x ^ y
 def xor(x, y):
 
-    xor = np.zeros(shape=(4096, 8))
+    xor = np.zeros(shape=(max_filesize, chunksize))
 
     if (x.size == y.size):
         max_size, col_size = x.shape
@@ -28,48 +32,27 @@ def xor(x, y):
     
     return xor
 
-def xor_vectorize(x, y):
+# Return padded bytearray of files
+def padding(x, y):
 
-    #np.zeros shape
-    shape = np.zeros(shape=(4096, 8))
+    x_ba = bytearray(open(x, "rb").read())
+    y_ba = bytearray(open(y, "rb").read())
 
-    x_b = bytearray(open(x, "rb").read())
-    y_b = bytearray(open(y, "rb").read())
+    #check bigger file and pad to its size
+    if (len(x_ba) > len(y_ba)):
+        size = len(x_ba)
+        y_ba = y_ba.ljust(size, b'\x00')
+    elif (len(x_ba) < len(y_ba)):
+        size = len(y_ba)
+        x_ba = x_ba.ljust(size, b'\x00')
 
-    if (len(x_b) > len(y_b)):
-        size = len(x_b)
-        diff = size - len(y_b)
-        y_b = y_b.ljust(size, b'\x00')
-    elif (len(x_b) < len(y_b)):
-        size = len(y_b)
-        diff = size - len(x_b)
-        x_b = x_b.ljust(size, b'\x00')
-    else:
-        size = len(x_b)
-    
-    print(len(x_b), len(y_b))
-
-    xor_bytes = bytearray(size)
-
-    for i in range(size):
-        xor_bytes[i] = x_b[i] ^ y_b[i]
-
-    byte_pos = 0
-    for x in xor_bytes:
-        byte = x
-        bits = bin(byte)[2:].zfill(8)
-        for n, bit in enumerate(bits):
-            if bit == '1':
-                shape[byte_pos, n] = 1.
-        byte_pos = byte_pos + 1
-
-    return shape
+    return x_ba, y_ba
 
 # Vectorize data from given file
 def vectorize(input_file):
 
     #np.zeros shape
-    shape = np.zeros(shape=(4096, 8))
+    shape = np.zeros(shape=(max_filesize, chunksize))
 
     with open(input_file, "rb") as f:
         byte = f.read(1)
@@ -84,33 +67,72 @@ def vectorize(input_file):
 
     return shape
 
-def checkDirectory(folder, x, y):
+# Vectorize data from given byte array of file
+def vectorize_bytearray(byte_arr):
+
+    #np.zeros shape
+    shape = np.zeros(shape=(max_filesize, 8))
+
+    #put bytearray bits into numpy array
+    byte_pos = 0
+    for x in byte_arr:
+        byte = x
+        bits = bin(byte)[2:].zfill(8)
+        for n, bit in enumerate(bits):
+            if bit == '1':
+                shape[byte_pos, n] = 1.
+        byte_pos = byte_pos + 1
+
+    return shape
+
+def checkDirectory(folder):
+
+    x = []
+    y = []
 
     print("[+] Checking directory: " + folder)
 
     skip_counter = 0
     for f in sorted(os.listdir(folder)):
         f = os.path.join(folder, f)
-        # Check size of file vectorize or skip accordingly
-        if "orig:" in f:
+        # Check name of file vectorize or skip accordingly
+        # orig/orig: due to change when copying folder
+        if "orig" in f:
             x_file = f
             x_vector = vectorize(x_file)
         elif "+cov" in f:
             y_file = f
-            if os.path.getsize(y_file) < 4096:
-                # TODO implement better design
-                #y_vector = xor_vectorize(x_file, y_file)
+            y_filesize = os.path.getsize(y_file)
+            if y_filesize < max_filesize:
+                # Vectorize y then x ^ y and store in y
                 y_vector = vectorize(y_file)
                 y_vector = xor(x_vector, y_vector)
                 x.append(x_vector)
                 y.append(y_vector)
             else:
-                skip_counter = skip_counter + 1
                 # Get segments needed for file
-                # Pad x_file
+                segments = y_filesize // max_filesize
+                if (y_filesize % max_filesize) > 0:
+                    segments = segments + 1
+                # Pad file to whichever is bigger in size
+                x_ba, y_ba = padding(x_file, y_file)
                 # Loop through segments
-                # Vectorize and append sequentially
-    print("Skipped " + str(skip_counter) + " files. Yet to implement segmentation.")
+                start = 0
+                end = max_filesize
+                for segment in range(segments):
+                    # Vectorize and append sequentially
+                    x_segment = x_ba[start:end]
+                    y_segment = y_ba[start:end]
+                    x_vector = vectorize_bytearray(x_segment)
+                    y_vector = vectorize_bytearray(y_segment)
+                    # x ^ y
+                    y_vector = xor(x_vector, y_vector)
+                    x.append(x_vector)
+                    y.append(y_vector)
+                    start = start + max_filesize
+                    end = end + max_filesize
+
+    print("[+] Done!")
 
     return x, y
 
@@ -121,9 +143,7 @@ def checkDirectories(folders):
     final_y = []
 
     for folder in folders:
-        x = []
-        y = []
-        x, y = checkDirectory(folder, x, y)
+        x, y = checkDirectory(folder)
         final_x.extend(x)
         final_y.extend(y)
 
