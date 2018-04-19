@@ -9,11 +9,9 @@ chunksize = 8
 
 def saveToFile(sample_x, sample_y, output_file):
 
-    np.save(output_file + "_x", sample_x)
-    print("[+] Output X dataset to: " + output_file + "_x.npy")
-    np.save(output_file + "_y", sample_y)
-    print("[+] Output Y dataset to: " + output_file + "_y.npy")
-
+    np.savez_compressed(output_file, x=sample_x, y=sample_y)
+    print("[+] Dataset stored in: " + output_file + ".npz")
+    
     return 0
 
 # Given numpy array of x and y, x ^ y
@@ -142,7 +140,7 @@ def checkDirectories(folders):
     final_x = []
     final_y = []
 
-    for folder in folders:
+    for folder in sorted(folders):
         x, y = checkDirectory(folder)
         final_x.extend(x)
         final_y.extend(y)
