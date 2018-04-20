@@ -167,10 +167,14 @@ def checkDirectory(folder):
         # orig/orig: due to change when copying folder
         if "orig" in f:
             x_file = f
-            if character_level:
-                x_vector = one_hot_encoding(x_file)
+            x_filesize = os.path.getsize(x_file)
+            if x_filesize < max_filesize:
+                if character_level:
+                    x_vector = one_hot_encoding(x_file)
+                else:
+                    x_vector = vectorize(x_file)
             else:
-                x_vector = vectorize(x_file)
+                continue
         elif "+cov" in f:
             y_file = f
             y_filesize = os.path.getsize(y_file)
