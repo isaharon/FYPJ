@@ -27,20 +27,7 @@ def main():
 
     input_file = args.input_file
     np_data = np.load(input_file)
-    dataset_x = np_data['x']
-    dataset_y = np_data['y']
-    print(dataset_x[0][:32])
-    print(dataset_x[3][:32])
-    print(dataset_x[5][:32])
-    samples, max_filesize, num_of_features = dataset_x.shape
-    new_x = dataset_x.reshape((samples, 512, 64))
-    print(new_x[0][:2])
-    print(new_x[3][:2])
-    print(new_x[5][:2])
-    print(new_x.shape)
-    print(new_x.dtype)
-    if (new_x[0] == new_x[3]).all():
-        print("Match")
+    samples, max_filesize, num_of_features = np_data['x'].shape
 
 if __name__ == '__main__':
     main()

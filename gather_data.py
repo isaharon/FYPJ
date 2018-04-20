@@ -3,9 +3,12 @@
 import os
 import argparse
 import numpy as np
+from itertools import zip_longest
 
-max_filesize = 4096
+max_filesize = 10240
 chunksize = 8
+character_level = False
+token_index = None
 
 def saveToFile(sample_x, sample_y, output_file):
 
@@ -23,8 +26,7 @@ def xor(x, y):
         max_size, col_size = x.shape
         for byte in range(max_size):
             for col in range(col_size):
-                if x[byte][col] != y[byte][col]:
-                    xor[byte][col] = 1.
+                if x[byte][col] != y[byte][col]: xor[byte][col] = 1.
     else:
         print("[-] Unable to perform xor due to shape.")
     
@@ -73,8 +75,7 @@ def vectorize_bytearray(byte_arr):
 
     #put bytearray bits into numpy array
     byte_pos = 0
-    for x in byte_arr:
-        byte = x
+    for byte in byte_arr:
         bits = bin(byte)[2:].zfill(8)
         for n, bit in enumerate(bits):
             if bit == '1':
@@ -83,52 +84,138 @@ def vectorize_bytearray(byte_arr):
 
     return shape
 
+def get_token_index():
+
+    token_index = {}
+
+    # Generate all possible 8-bit characters
+    characters = ''
+    for i in range(0, 256):
+        characters += chr(i)
+
+    # Populate token index with characters in binary
+    for n, character in enumerate(characters):
+        character = character.encode('UTF-8')
+        token_index[character] = n + 1
+
+    return token_index
+
+def one_hot_encoding(input_file):
+
+    #np.zeros shape
+    shape = np.zeros(shape=(512, 256))
+
+    with open(input_file, "rb") as f:
+        byte = f.read(1)
+        byte_pos = 0
+        while byte:
+            index = token_index.get(byte)
+            shape[byte_pos, index] = 1.
+            byte = f.read(1)
+            byte_pos += 1
+
+    return shape
+
+def one_hot_encoding_bytearray(byte_arr):
+
+    #np.zeros shape
+    shape = np.zeros(shape=(512, 256))
+
+    #put bytearray bits into numpy array
+    byte_pos = 0
+    for index in byte_arr:
+        if index > 0:
+            shape[byte_pos, index] = 1.
+            byte_pos += 1
+
+    return shape
+
+def character_xor(x_ba, y_ba):
+    
+    xor = np.zeros(shape=(512, 256))
+    
+    byte_pos = 0
+    if len(x_ba) == len(y_ba):
+        for char_x, char_y in zip_longest(x_ba, y_ba, fillvalue=0):
+            index = char_x ^ char_y
+            if index > 0:
+                xor[byte_pos, index] = 1.
+            byte_pos += 1
+
+    return xor
+
+def get_segments(filesize):
+
+    segments = filesize // max_filesize
+    if (filesize % max_filesize) > 0:
+        segments = segments + 1
+
+    return segments
+
 def checkDirectory(folder):
 
+    print("[+] Checking directory: " + folder)
+    
     x = []
     y = []
 
-    print("[+] Checking directory: " + folder)
+    files = sorted(os.listdir(folder))
 
-    skip_counter = 0
-    for f in sorted(os.listdir(folder)):
+    for f in files:
         f = os.path.join(folder, f)
         # Check name of file vectorize or skip accordingly
         # orig/orig: due to change when copying folder
         if "orig" in f:
             x_file = f
-            x_vector = vectorize(x_file)
+            if character_level:
+                x_vector = one_hot_encoding(x_file)
+            else:
+                x_vector = vectorize(x_file)
         elif "+cov" in f:
             y_file = f
             y_filesize = os.path.getsize(y_file)
             if y_filesize < max_filesize:
-                # Vectorize y then x ^ y and store in y
-                y_vector = vectorize(y_file)
-                y_vector = xor(x_vector, y_vector)
-                x.append(x_vector)
-                y.append(y_vector)
-            else:
-                # Get segments needed for file
-                segments = y_filesize // max_filesize
-                if (y_filesize % max_filesize) > 0:
-                    segments = segments + 1
-                # Pad file to whichever is bigger in size
-                x_ba, y_ba = padding(x_file, y_file)
-                # Loop through segments
-                start = 0
-                end = max_filesize
-                for segment in range(segments):
-                    # Vectorize and append sequentially
-                    x_segment = x_ba[start:end]
-                    y_segment = y_ba[start:end]
-                    x_vector = vectorize_bytearray(x_segment)
-                    y_vector = vectorize_bytearray(y_segment)
-                    # x ^ y
+                if character_level:
+                    x_ba = bytearray(open(x_file, "rb").read())
+                    y_ba = bytearray(open(y_file, "rb").read())
+                    y_vector = character_xor(x_ba, y_ba)
+                    x.append(x_vector)
+                    y.append(y_vector)
+                else:
+                    # Vectorize y then x ^ y and store in y
+                    y_vector = vectorize(y_file)
                     y_vector = xor(x_vector, y_vector)
                     x.append(x_vector)
                     y.append(y_vector)
-                    start = start + max_filesize
-                    end = end + max_filesize
+            else:
+                # Get segments needed for file
+                segments = get_segments(y_filesize)
+
+                # Pad file to whichever is bigger in size
+                x_ba, y_ba = padding(x_file, y_file)
+
+                if character_level:
+                    #Loop thorugh segments (character encoding)
+                    for start in range(0, segments*512, 512):
+                        # Vectorize and append sequentially
+                        x_segment = x_ba[start:start+512]
+                        y_segment = y_ba[start:start+512]
+                        x_vector = one_hot_encoding_bytearray(x_segment)
+                        y_vector = character_xor(x_segment, y_segment)
+                        x.append(x_vector)
+                        y.append(y_vector)
+                else:
+                    # Loop through segments (bit encoding)
+                    for start in range(0, segments*max_filesize, max_filesize):
+                        # Vectorize and append sequentially
+                        x_segment = x_ba[start:start+max_filesize]
+                        y_segment = y_ba[start:start+max_filesize]
+                        x_vector = vectorize_bytearray(x_segment)
+                        y_vector = vectorize_bytearray(y_segment)
+                        # x ^ y
+                        y_vector = xor(x_vector, y_vector)
+                        x.append(x_vector)
+                        y.append(y_vector)
 
     print("[+] Done!")
 
@@ -151,10 +238,13 @@ def checkDirectories(folders):
     return final_x, final_y
 
 def main():
+    global character_level
+    global token_index
 
     parser = argparse.ArgumentParser(description='Gather input, code coverage dataset from AFL output directory.') 
     parser.add_argument("-i", "--input-dir", required=True, dest="input_dir", help="master directory to collect dataset pair from", metavar="INPUT_DIR")
     parser.add_argument("-o", "--output-file", required=True, dest="output_file", help="output filename", metavar="OUTPUT_FILE")
+    parser.add_argument("-c", "--character-encoding", dest="char_encoding", help="use character level encoding", action="store_true")
 
     args = parser.parse_args()
 
@@ -165,6 +255,10 @@ def main():
     if not os.access(args.input_dir, os.R_OK):
         print("[-] " + args.input_dir + " access denied.")
         exit(0)
+
+    if args.char_encoding:
+        character_level = True
+        token_index = get_token_index()
 
     # Argument vectors into variables
     input_dir = os.path.abspath(args.input_dir)
