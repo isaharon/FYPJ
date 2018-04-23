@@ -178,7 +178,7 @@ def checkDirectory(folder):
         elif "+cov" in f:
             y_file = f
             y_filesize = os.path.getsize(y_file)
-            if y_filesize < max_filesize:
+            if y_filesize < max_filesize and x_filesize < max_filesize:
                 if character_level:
                     x_ba = bytearray(open(x_file, "rb").read())
                     y_ba = bytearray(open(y_file, "rb").read())
@@ -186,12 +186,8 @@ def checkDirectory(folder):
                     x.append(x_vector)
                     y.append(y_vector)
                 else:
-                    if y_filesize < x_filesize:
-                        x_ba, y_ba = padding(x_file, y_file)
-                        y_vector = vectorize_bytearray(y_ba)
-                    else:
-                        # Vectorize y then x ^ y and store in y
-                        y_vector = vectorize(y_file)
+                    # Vectorize y then x ^ y and store in y
+                    y_vector = vectorize(y_file)
                     y_vector = xor(x_vector, y_vector)
                     x.append(x_vector)
                     y.append(y_vector)
