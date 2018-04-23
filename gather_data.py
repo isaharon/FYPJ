@@ -186,8 +186,12 @@ def checkDirectory(folder):
                     x.append(x_vector)
                     y.append(y_vector)
                 else:
-                    # Vectorize y then x ^ y and store in y
-                    y_vector = vectorize(y_file)
+                    if y_filesize < x_filesize:
+                        x_ba, y_ba = padding(x_file, y_file)
+                        y_vector = vectorize_bytearray(y_ba)
+                    else:
+                        # Vectorize y then x ^ y and store in y
+                        y_vector = vectorize(y_file)
                     y_vector = xor(x_vector, y_vector)
                     x.append(x_vector)
                     y.append(y_vector)
