@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 from itertools import zip_longest
 
-max_filesize = 10240
+max_filesize = 4096
 chunksize = 8
 character_level = False
 token_index = None
@@ -103,7 +103,7 @@ def get_token_index():
 def one_hot_encoding(input_file):
 
     #np.zeros shape
-    shape = np.zeros(shape=(512, 256))
+    shape = np.zeros(shape=(4096, 256))
 
     with open(input_file, "rb") as f:
         byte = f.read(1)
@@ -119,7 +119,7 @@ def one_hot_encoding(input_file):
 def one_hot_encoding_bytearray(byte_arr):
 
     #np.zeros shape
-    shape = np.zeros(shape=(512, 256))
+    shape = np.zeros(shape=(4096, 256))
 
     #put bytearray bits into numpy array
     byte_pos = 0
@@ -132,7 +132,7 @@ def one_hot_encoding_bytearray(byte_arr):
 
 def character_xor(x_ba, y_ba):
     
-    xor = np.zeros(shape=(512, 256))
+    xor = np.zeros(shape=(4096, 256))
     
     byte_pos = 0
     if len(x_ba) == len(y_ba):
