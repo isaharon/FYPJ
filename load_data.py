@@ -27,9 +27,9 @@ def main():
 
     input_file = args.input_file
     np_data = np.load(input_file)
-    samples, max_filesize, num_of_features = np_data['x'].shape
-    print(np_data['x'].shape)
-    print(np_data['x'][0][0])
+    x_dataset = np_data['x']
+    y_dataset = np_data['y']
+    print(x_dataset.shape, y_dataset.shape)
 
 if __name__ == '__main__':
     main()

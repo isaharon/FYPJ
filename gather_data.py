@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 
+import random
 import os
 import argparse
 import numpy as np
 from itertools import zip_longest
 
-max_filesize = 4096
+max_filesize = 10240
 chunksize = 8
 character_level = False
 token_index = None
@@ -103,7 +104,7 @@ def get_token_index():
 def one_hot_encoding(input_file):
 
     #np.zeros shape
-    shape = np.zeros(shape=(4096, 256))
+    shape = np.zeros(shape=(max_filesize, 256))
 
     with open(input_file, "rb") as f:
         byte = f.read(1)
@@ -119,7 +120,7 @@ def one_hot_encoding(input_file):
 def one_hot_encoding_bytearray(byte_arr):
 
     #np.zeros shape
-    shape = np.zeros(shape=(4096, 256))
+    shape = np.zeros(shape=(max_filesize, 256))
 
     #put bytearray bits into numpy array
     byte_pos = 0
@@ -132,7 +133,7 @@ def one_hot_encoding_bytearray(byte_arr):
 
 def character_xor(x_ba, y_ba):
     
-    xor = np.zeros(shape=(4096, 256))
+    xor = np.zeros(shape=(max_filesize, 256))
     
     byte_pos = 0
     if len(x_ba) == len(y_ba):
@@ -161,65 +162,68 @@ def checkDirectory(folder):
 
     files = sorted(os.listdir(folder))
 
+    data_counter = 0
+    skip_counter = random.randint(3,8)
+
     for f in files:
         f = os.path.join(folder, f)
         # Check name of file vectorize or skip accordingly
         # orig/orig: due to change when copying folder
+
         if "orig" in f:
+
             x_file = f
             x_filesize = os.path.getsize(x_file)
-            if x_filesize < max_filesize:
-                if character_level:
-                    x_vector = one_hot_encoding(x_file)
-                else:
-                    x_vector = vectorize(x_file)
-            else:
-                continue
-        elif "+cov" in f:
-            y_file = f
-            y_filesize = os.path.getsize(y_file)
-            if y_filesize < max_filesize and x_filesize < max_filesize:
-                if character_level:
-                    x_ba = bytearray(open(x_file, "rb").read())
-                    y_ba = bytearray(open(y_file, "rb").read())
-                    y_vector = character_xor(x_ba, y_ba)
+
+        if "+cov" in f:
+
+            #if data_counter > 200:
+            #    break
+
+            skip_counter += 1
+            if skip_counter > 5:
+                y_file = f
+                y_filesize = os.path.getsize(y_file)
+                if y_filesize < max_filesize and x_filesize < max_filesize:
+                    if character_level:
+                        x_vector = one_hot_encoding(x_file)
+                        x_ba = bytearray(open(x_file, "rb").read())
+                        y_ba = bytearray(open(y_file, "rb").read())
+                        y_vector = character_xor(x_ba, y_ba)
+                    else:
+                        # Vectorize y then x ^ y and store in y
+                        x_vector = vectorize(x_file)
+                        y_vector = vectorize(y_file)
+                        y_vector = xor(x_vector, y_vector)
                     x.append(x_vector)
                     y.append(y_vector)
                 else:
-                    # Vectorize y then x ^ y and store in y
-                    y_vector = vectorize(y_file)
-                    y_vector = xor(x_vector, y_vector)
-                    x.append(x_vector)
-                    y.append(y_vector)
-            else:
-                # Get segments needed for file
-                segments = get_segments(y_filesize)
+                    # Get segments needed for file
+                    segments = get_segments(y_filesize)
 
-                # Pad file to whichever is bigger in size
-                x_ba, y_ba = padding(x_file, y_file)
+                    # Pad file to whichever is bigger in size
+                    x_ba, y_ba = padding(x_file, y_file)
 
-                if character_level:
-                    #Loop thorugh segments (character encoding)
-                    for start in range(0, segments*512, 512):
-                        # Vectorize and append sequentially
-                        x_segment = x_ba[start:start+512]
-                        y_segment = y_ba[start:start+512]
-                        x_vector = one_hot_encoding_bytearray(x_segment)
-                        y_vector = character_xor(x_segment, y_segment)
-                        x.append(x_vector)
-                        y.append(y_vector)
-                else:
-                    # Loop through segments (bit encoding)
+                    #Loop through segments
                     for start in range(0, segments*max_filesize, max_filesize):
                         # Vectorize and append sequentially
                         x_segment = x_ba[start:start+max_filesize]
                         y_segment = y_ba[start:start+max_filesize]
-                        x_vector = vectorize_bytearray(x_segment)
-                        y_vector = vectorize_bytearray(y_segment)
-                        # x ^ y
-                        y_vector = xor(x_vector, y_vector)
+
+                        if character_level:
+                            x_vector = one_hot_encoding_bytearray(x_segment)
+                            y_vector = character_xor(x_segment, y_segment)
+                        else:
+                            x_vector = vectorize_bytearray(x_segment)
+                            y_vector = vectorize_bytearray(y_segment)
+                            # x ^ y
+                            y_vector = xor(x_vector, y_vector)
+
                         x.append(x_vector)
                         y.append(y_vector)
+
+                data_counter += 1
+                skip_counter = random.randint(0,9)
 
     print("[+] Done!")
 
@@ -244,6 +248,7 @@ def checkDirectories(folders):
 def main():
     global character_level
     global token_index
+    global max_filesize
 
     parser = argparse.ArgumentParser(description='Gather input, code coverage dataset from AFL output directory.') 
     parser.add_argument("-i", "--input-dir", required=True, dest="input_dir", help="master directory to collect dataset pair from", metavar="INPUT_DIR")
@@ -263,6 +268,7 @@ def main():
     if args.char_encoding:
         character_level = True
         token_index = get_token_index()
+        max_filesize = 4096
 
     # Argument vectors into variables
     input_dir = os.path.abspath(args.input_dir)
