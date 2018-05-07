@@ -241,6 +241,11 @@ def checkDirectories(folders):
     final_x = np.array(final_x)
     final_y = np.array(final_y)
 
+    x_samples, filesize, num_of_features = final_x.shape
+    y_samples, filesize, num_of_features = final_y.shape
+
+    final_x, final_y = final_x.reshape(x_samples, 3840, 64), final_y.reshape(y_samples, 3840, 64)
+
     return final_x, final_y
 
 def main():
