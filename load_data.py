@@ -31,5 +31,17 @@ def main():
     y_dataset = np_data['y']
     print(x_dataset.shape, y_dataset.shape)
 
+    # Check if x dataset is equal and different
+    t = 0
+    f = 0
+
+    for i in range(0, 100):
+        if np.array_equal(x_dataset[i], x_dataset[i+1]):
+            t += 1
+        else:
+            f += 1
+    print("True: ", t)
+    print("False: ", f)
+
 if __name__ == '__main__':
     main()

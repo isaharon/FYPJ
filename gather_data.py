@@ -6,7 +6,7 @@ import argparse
 import numpy as np
 from itertools import zip_longest
 
-max_filesize = 10240
+max_filesize = 30720
 chunksize = 8
 character_level = False
 token_index = None
@@ -163,7 +163,7 @@ def checkDirectory(folder):
     files = sorted(os.listdir(folder))
 
     data_counter = 0
-    skip_counter = random.randint(3,8)
+    skip_counter = 5
 
     for f in files:
         f = os.path.join(folder, f)
@@ -171,14 +171,12 @@ def checkDirectory(folder):
         # orig/orig: due to change when copying folder
 
         if "orig" in f:
-
             x_file = f
             x_filesize = os.path.getsize(x_file)
-
-        if "+cov" in f:
-
-            #if data_counter > 200:
-            #    break
+        elif "+cov" in f:
+            # Get out of loop once certain sample size reached
+            if data_counter > 99:
+                break
 
             skip_counter += 1
             if skip_counter > 5:
@@ -223,7 +221,7 @@ def checkDirectory(folder):
                         y.append(y_vector)
 
                 data_counter += 1
-                skip_counter = random.randint(0,9)
+                skip_counter = random.randint(0,5)
 
     print("[+] Done!")
 
