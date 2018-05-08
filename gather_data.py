@@ -175,8 +175,8 @@ def checkDirectory(folder):
             x_filesize = os.path.getsize(x_file)
         elif "+cov" in f:
             # Get out of loop once certain sample size reached
-            if data_counter > 99:
-                break
+            #if data_counter > 99:
+            #    break
 
             skip_counter += 1
             if skip_counter > 5:

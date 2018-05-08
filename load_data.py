@@ -30,18 +30,22 @@ def main():
     x_dataset = np_data['x']
     y_dataset = np_data['y']
     print(x_dataset.shape, y_dataset.shape)
+    num, timestep, num_of_features = x_dataset.shape
 
     # Check if x dataset is equal and different
     t = 0
     f = 0
+    first_sample = 0
 
-    for i in range(0, 100):
-        if np.array_equal(x_dataset[i], x_dataset[i+1]):
+    for i in range(0, num):
+        if np.array_equal(x_dataset[first_sample], x_dataset[i]):
             t += 1
         else:
+            t += 1
             f += 1
-    print("True: ", t)
-    print("False: ", f)
+            first_sample = i
+    print("Files checked: ", t)
+    print("Variety: ", f+1)
 
 if __name__ == '__main__':
     main()
