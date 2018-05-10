@@ -163,23 +163,19 @@ def checkDirectory(folder):
     files = sorted(os.listdir(folder))
 
     data_counter = 0
-    skip_counter = 5
+    file_counter = 0
 
     for f in files:
         f = os.path.join(folder, f)
         # Check name of file vectorize or skip accordingly
         # orig/orig: due to change when copying folder
+        file_counter += 1
 
         if "orig" in f:
             x_file = f
             x_filesize = os.path.getsize(x_file)
         elif "+cov" in f:
-            # Get out of loop once certain sample size reached
-            #if data_counter > 99:
-            #    break
-
-            skip_counter += 1
-            if skip_counter > 5:
+            if file_counter > 100:
                 y_file = f
                 y_filesize = os.path.getsize(y_file)
                 if y_filesize < max_filesize and x_filesize < max_filesize:
@@ -220,10 +216,12 @@ def checkDirectory(folder):
                         x.append(x_vector)
                         y.append(y_vector)
 
+                # Reset and add counters
+                file_counter = 0
                 data_counter += 1
-                skip_counter = random.randint(0,5)
 
     print("[+] Done!")
+    print("[-] No. of data collected: " + str(data_counter))
 
     return x, y
 
@@ -245,6 +243,8 @@ def checkDirectories(folders):
     y_samples, filesize, num_of_features = final_y.shape
 
     final_x, final_y = final_x.reshape(x_samples, 3840, 64), final_y.reshape(y_samples, 3840, 64)
+
+    print("[+] Total samples collected: " + str(x_samples) + "/" + str(y_samples))
 
     return final_x, final_y
 
