@@ -6,17 +6,16 @@ import os
 import numpy as np
 from keras.models import load_model
 
-model = load_model("model9.h5")
+model = load_model("model8.h5")
 max_filesize = 20480
 bytesize = 8
 
 def query_model(seed):
 
     # Query model for the prediction
-    predictions = model.predict_classes(checkFile(seed))
+    predictions = model.predict(checkFile(seed))
 
     # Determine bytemask from prediction output
-    # Might not need
     bytemask = get_bytemask(predictions)
 
     return bytemask
@@ -83,8 +82,8 @@ def padding(x, y):
 
 def get_bytemask(predictions):
 
-    for (x, y, z), value in ndenumerate(predictions):
-        if value > 0.2:
+    for (x, y, z), value in np.ndenumerate(predictions):
+        if value > 0.:
             predictions[x, y, z] = 1.
         else:
             predictions[x, y, z] = 0.
@@ -100,7 +99,9 @@ def diff(input_file, seed):
     seed_filesize = os.path.getsize(seed)
 
     if input_filesize < max_filesize and seed_filesize < max_filesize:
-        diff_vector = xor(input_file, seed)
+        input_vector = vectorize(input_file)
+        seed_vector = vectorize(seed)
+        diff_vector = xor(input_vector, seed_vector)
         diff.append(diff_vector)
     else:
         # Get segments
@@ -135,7 +136,7 @@ def is_useful(diff, bytemask):
     useful_bit = 0
 
     if (diff.size == bytemask.size):
-        for (x, y, z), value in ndenumerate(diff):
+        for (x, y, z), value in np.ndenumerate(diff):
             if diff[x, y, z] and bytemask[x, y, z]:
                 useful_bit += 1
 
@@ -149,8 +150,6 @@ def get_segments(filesize):
     segments = filesize // max_filesize
     if (filesize % max_filesize) > 0:
         segments += 1
-
-    return segments
 
 def checkFile(input_file):
 
