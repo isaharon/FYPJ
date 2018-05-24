@@ -28,7 +28,6 @@ Temporary Items
 
 # Project files and directory
 *.npy
-*.npz
 /fuzzerdata001
 /fuzzerdata002
 /Old
