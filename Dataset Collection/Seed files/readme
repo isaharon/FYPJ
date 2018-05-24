@@ -1,0 +1,9 @@
+Contain folder, ELF < 30kB/ which stores the selected ELF files used for fuzzing for future references.
+
+seeds order
+-------------
+ - Notes the amount of time the files are fuzzed for at one time
+
+Files chosen were selected from /bin, /sbin/, /usr/bin, /usr/sbin and is varied as much as possible their difference in filesize and their usage. They are < 30kB to accommodate for the fact that afl-fuzz will mutate inputs of filesize larger than its seed after running for sometime. This will result in larger datasets due to the segmentation implemented in the data gathering script, gather_data.py, which might affect the collection of data as the RAM would run out of memory.
+
+To mitigate this, it is suggested that data should be collected in smaller fragments and then  concatenated when loading the dataset for training on a platform with appropriate RAM capacity.

@@ -1,0 +1,10 @@
+Contain gather_data.py, for gathering dataset from an input directory, and load_data.py, for checking the dataset shape and to verify its correctness by looking in its array.
+
+python3 gather_data.py -i <input_dir> -o <output_filename> [-h for help]
+python3 load_data.py <.npz file>
+
+Full\ Method/ - Gathers the data pair without skipping any files
+Sampling\ Method/ - Simulates a 2% sampling rate of collection by skipping 50 files/collection
+Skip\ 5\ Method - Skips 5 files/collection
+
+These methods were used to vary the training data, X, while having a sizeable amount of training label, Y, for the neural network to train on without feeding too much noise which could possibly lead to undesired results. 

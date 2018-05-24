@@ -1,0 +1,2 @@
+Stores .npz files for training, validation & test.
+Each number corresponds to the neural_network_model<no>.ipynb it was used on.

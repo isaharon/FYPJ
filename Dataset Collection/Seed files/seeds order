@@ -1,0 +1,198 @@
+seed order
+
+GMT: Monday, April 23, 2018 2:39:48 AM to GMT: Monday, April 23, 2018 7:15:21 AM
+< 5 hours
+seed 1 = clear
+seed 2 = tabs
+seed 3 = setarch
+seed 4 = file
+
+GMT: Wednesday, April 25, 2018 4:56:27 AM to GMT: Wednesday, May 2, 2018 12:16:19 AM
+> 175 hours or 7 days
+Cut off Apr 26 1am (done on categorization)
+seed 5 = regdbdump
+seed 6 = hostname
+seed 7 = raw
+seed 8 = vcstime
+
+GMT: Wednesday, May 2, 2018 2:46:20 AM to GMT: Thursday, May 3, 2018 7:18:01 AM
+28.5 hours or > 1 days
+seed 9 = filefrag
+seed 10 = pnminvert
+seed 11 = kill
+seed 12 = cracklib-unpacker
+
+GMT: Thursday, May 3, 2018 7:34:51 AM to GMT: Friday, May 4, 2018 7:34:53 AM
+24 hours
+seed 13 = ppmcolors
+seed 14 = xxd
+seed 15 = cracklib-check
+seed 16 = listres
+
+GMT: Friday, May 4, 2018 7:35:05 AM to GMT: Monday, May 7, 2018 12:18:56 AM
+76.75 hours or > 3 days
+cut off done may 5th 3.20am
+seed 17 = ppmmake
+seed 18 = umount
+seed 19 = tcpdmatch
+seed 20 = openvt
+
+GMT: Monday, May 7, 2018 12:23:58 AM to ??
+9 hours
+seed 21 = arping
+seed 22 = bzip2recover
+seed 23 = pgmbentley
+seed 24 = script
+
+14 hours 40 mins
+seed 25 = chvt
+seed 26 = ncal
+seed 27 = pnmcut
+seed 28 = showrgb
+
+9h 23mins
+seed 29 = fstab-decode
+seed 30 = nstat
+seed 31 = capsh
+seed 32 = gresource
+
+13h 53 mins
+seed 33 = chattr
+seed 34 = true
+seed 35 = iecset
+seed 36 = vstp
+
+9hr 30 mins
+seed 37 = oakdecode
+seed 38 = blkdiscard
+seed 39 = kbd_mode
+seed 40 = tailf
+
+14hrs 18 mins
+seed 41 = alsaucm
+seed 42 = iwconfig
+seed 43 = xwud
+seed 44 = free
+
+9hrs 30mins
+seed 45 = nfnl_osf
+seed 46 = getconf
+seed 47 = false
+seed 48 = chacl
+
+10 hrs
+seed 49 = tracepath
+seed 50 = ctrlaltdel
+seed 51 = msgcat
+seed 52 = dumpe2fs
+
+16 hrs
+seed 53 = file2brl
+seed 54 = whereis
+seed 55 = flock
+seed 56 = killall5
+
+14 hrs
+seed 57 = ionice
+seed 58 = fgconsole
+seed 59 = link
+seed 60 = pwdx
+
+12 hrs
+seed 61 = getcap
+seed 62 = funzip
+seed 63 = compiz
+seed 64 = time
+
+12 hrs
+seed 65 = run-parts
+seed 66 = ipmaddr
+seed 67 = mountpoint
+seed 68 = swaplabel
+
+13hrs
+seed 69 = tempfile
+seed 70 = ul
+seed 71 = ibus
+seed 72 = rev
+
+13hrs
+seed 73 = badblocks
+seed 74 = isosize
+seed 75 = column
+seed 76 = watch
+
+13hrs
+seed 77 = pdffonts
+seed 78 = gencat
+seed 79 = fsfreeze
+seed 80 = pstree
+
+13hrs
+seed 81 = msgexec
+seed 82 = chcpu
+seed 83 = iwevent
+seed 84 = tty
+
+12 hrs
+seed 85 = paperconf
+seed 86 = getfacl
+seed 87 = rarp
+seed 88 = readprofile
+
+15 hrs
+seed 89 = rtkitctl
+seed 90 = skill
+seed 91 = mkfs
+seed 92 = showkey
+
+15hrs
+seed 93 = swapoff
+seed 94 = pamcut
+seed 95 = pdfseparate
+seed 96 = xkill
+
+13hrs
+seed 97 = pdfunite
+seed 98 = plipconfig
+seed 99 = whiptail
+seed 100 = whoami
+
+11hrs 41mins
+seed 101 = resizecons
+seed 102 = vbetool
+seed 103 = lesskey
+seed 104 = sysctl
+
+13hrs
+seed 105 = iptunnel
+seed 106 = setcap
+seed 107 = slabtop
+seed 108 = tcpd
+
+13hrs 50mins
+seed 109 = xhost
+seed 110 = resize
+seed 111 = calendar
+seed 112 = xload
+
+19 hrs
+seed 113 = xvinfo
+seed 114 = try-from
+seed 115 = zdump
+seed 116 = e2freefrag
+
+13 hrs
+seed 117 = killall
+seed 118 = ulockmgr_server
+seed 119 = nameif
+seed 120 = setvtrgb
+
+12hrs
+seed 121 = mapscrn
+seed 122 = chat
+seed 123 = gs
+seed 124 = switch_root
+
+1hrs
+seed 125 = pbmtog3

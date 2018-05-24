@@ -1,0 +1,18 @@
+afl-fuzz/ contain the augmented afl-fuzz program.
+Full\ sources/ contain the full original source codes and the augmented source codes.
+
+afl-fuzz directory
+------------------
+afl-fuzz.c embed with Python functions. 
+ -Comments with // FYPJ <--additional comments--> indicate addition of codes. 
+
+Makefile
+ - Edited in order to compile afl-fuzz with additional includes and link to Python.h
+ - make afl-fuzz was executed to compile
+
+augmented.py
+ - contain python functions
+ - edit model variable to change model file used
+
+model_10.h5
+ - model file used to query predictions from
